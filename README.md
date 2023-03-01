@@ -14,7 +14,7 @@
 
   <h3 align="center">Microservices in radar track extraction</h3>
 
-  <p align="center">
+  <p>
     Spring Boot Applications
     <br />
 -   radar-service: generating 2D plot data for 5 tracks with respect to 2nd degree of polynomial function<br />
