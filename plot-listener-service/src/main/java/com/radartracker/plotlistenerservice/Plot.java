@@ -4,13 +4,17 @@ import java.math.BigDecimal;
 import java.time.LocalTime;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
 public class Plot {
 
 	@Id
-	private BigDecimal id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private long id;
+	
 	private double x;
 	private double y;
 	private LocalTime timeStamp;
