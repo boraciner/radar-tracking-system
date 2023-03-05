@@ -11,16 +11,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PlotSender {
-
-	
 	private static final Logger log = LoggerFactory.getLogger(PlotSender.class);
-
-	
 
 	@Scheduled(fixedRate = 1000)
 	public void reportCurrentTime() {
 		log.info("The time is now {}", LocalTime.now());
 	}
-	
-	
 }
