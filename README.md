@@ -14,11 +14,12 @@
 <p>
     Spring Boot Applications
     <br />
--   radar-service: generating 2D plot data for 5 tracks with respect to 2nd degree of polynomial function<br />
--   plot-listener-service: listens plots from any source and writes to Msql DB<br />
+-   naming-service (8761): Eureka Server
+-   radar-service (8000): generating 2D plot data for 5 tracks with respect to 2nd degree of polynomial function<br />
+-   plot-listener-service (8100): listens plots from any source and writes to Msql DB<br />
 Endpoint:<br />
-POST /tracks (port : 8100)<br />
--   tracker-service: retrieves the plot data and generates tracks by running kalman or other tracker filters<br />
+POST /tracks<br />
+-   tracker-service (8200): retrieves the plot data and generates tracks by running kalman or other tracker filters<br />
 
   </p>
 </p>
