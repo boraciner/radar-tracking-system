@@ -8,15 +8,10 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/boraciner/radar-tracking-system">
     <img src="assets/sys.jpeg" alt="Logo">
     <img src="https://cdn.pixabay.com/animation/2022/11/13/04/07/04-07-28-574_512.gif" alt="Logo">
-    
-  </a>
-
-  <h3 align="center">Microservices in radar track extraction</h3>
-
-  <p>
+    <h3 align="center">Microservices in radar track extraction</h3>
+<p>
     Spring Boot Applications
     <br />
 -   radar-service: generating 2D plot data for 5 tracks with respect to 2nd degree of polynomial function<br />
