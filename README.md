@@ -8,7 +8,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-    <img src="assets/sys.jpeg" alt="Logo">
+    <img src="sys.jpeg" alt="Logo">
     <img src="https://cdn.pixabay.com/animation/2022/11/13/04/07/04-07-28-574_512.gif" alt="Logo" width="300" height="300">
     <h3 align="center">Microservices in radar track extraction</h3>
 <p>
