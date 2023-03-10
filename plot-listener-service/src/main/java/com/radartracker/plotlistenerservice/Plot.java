@@ -1,19 +1,11 @@
 package com.radartracker.plotlistenerservice;
 
-import java.math.BigDecimal;
 import java.time.LocalTime;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Entity
 public class Plot {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
 	private double x;
 	private double y;
 	private double vx;
@@ -40,12 +32,6 @@ public class Plot {
 	public void setTimeStamp(LocalTime timeStamp) {
 		this.timeStamp = timeStamp;
 	}
-	public long getId() {
-		return id;
-	}
-	public void setId(long id) {
-		this.id = id;
-	}
 	public double getVx() {
 		return vx;
 	}
@@ -61,7 +47,7 @@ public class Plot {
 	public Plot() {
 		super();
 	}
-	public Plot(double x, double y, double vx, double vy, LocalTime timeStamp) {
+	public Plot(@JsonProperty double x, @JsonProperty double y, @JsonProperty double vx, @JsonProperty double vy,@JsonProperty LocalTime timeStamp) {
 		super();
 		this.x = x;
 		this.y = y;
@@ -71,7 +57,7 @@ public class Plot {
 	}
 	@Override
 	public String toString() {
-		return "Plot [id=" + id + ", x=" + x + ", y=" + y + ", vx=" + vx + ", vy=" + vy + ", timeStamp=" + timeStamp
+		return "Plot [ x=" + x + ", y=" + y + ", vx=" + vx + ", vy=" + vy + ", timeStamp=" + timeStamp
 				+ "]";
 	}
 }
