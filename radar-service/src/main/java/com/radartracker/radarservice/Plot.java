@@ -1,12 +1,10 @@
 package com.radartracker.radarservice;
 
-import java.math.BigDecimal;
 import java.time.LocalTime;
 
 
 public class Plot {
 
-	private long id;
 	private double x;
 	private double y;
 	private double vx;
@@ -33,12 +31,6 @@ public class Plot {
 	public void setTimeStamp(LocalTime timeStamp) {
 		this.timeStamp = timeStamp;
 	}
-	public long getId() {
-		return id;
-	}
-	public void setId(long id) {
-		this.id = id;
-	}
 	public double getVx() {
 		return vx;
 	}
@@ -54,7 +46,7 @@ public class Plot {
 	public Plot() {
 		super();
 	}
-	public Plot(double x, double y, double vx, double vy, LocalTime timeStamp) {
+	public Plot( double x,  double y,  double vx,  double vy, LocalTime timeStamp) {
 		super();
 		this.x = x;
 		this.y = y;
@@ -64,7 +56,7 @@ public class Plot {
 	}
 	@Override
 	public String toString() {
-		return "Plot [id=" + id + ", x=" + x + ", y=" + y + ", vx=" + vx + ", vy=" + vy + ", timeStamp=" + timeStamp
+		return "Plot [ x=" + x + ", y=" + y + ", vx=" + vx + ", vy=" + vy + ", timeStamp=" + timeStamp
 				+ "]";
 	}
 }

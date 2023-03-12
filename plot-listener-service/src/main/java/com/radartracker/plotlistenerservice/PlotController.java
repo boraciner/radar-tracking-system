@@ -19,17 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class PlotController {
 
-	final KafkaTemplate kafkaTemplate;
-	Logger logger = LoggerFactory.getLogger(PlotController.class);
-	
-	public PlotController(KafkaTemplate kafkaTemplate) {
-		this.kafkaTemplate = kafkaTemplate;
-	}
+	@Autowired
+	private KafkaProducerService kafkaProducerService;
 	
 	@PostMapping("/plots")
 	public void getPlots(@RequestBody Plot plot) {
 		System.out.println("Post plots is called :"+plot);
-        this.kafkaTemplate.send("transaction-1", plot);
+		kafkaProducerService.sendMessage(plot);
 	}
 	
 	

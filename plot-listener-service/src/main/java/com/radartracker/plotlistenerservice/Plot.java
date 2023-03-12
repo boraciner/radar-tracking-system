@@ -2,8 +2,6 @@ package com.radartracker.plotlistenerservice;
 
 import java.time.LocalTime;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class Plot {
 
 	private double x;
@@ -47,7 +45,7 @@ public class Plot {
 	public Plot() {
 		super();
 	}
-	public Plot(@JsonProperty double x, @JsonProperty double y, @JsonProperty double vx, @JsonProperty double vy,@JsonProperty LocalTime timeStamp) {
+	public Plot( double x,  double y,  double vx,  double vy, LocalTime timeStamp) {
 		super();
 		this.x = x;
 		this.y = y;
