@@ -16,10 +16,10 @@
     <br />
 -   naming-service (8761): Eureka Server
 -   radar-service (8000): generating 2D plot data for 5 tracks with respect to 2nd degree of polynomial function<br />
--   plot-listener-service (8100): listens plots from any source and writes to Kafka cluster<br />
+-   plot-listener-service (8100): listens plots from any source and publishes to Kafka topic : radar-plot cluster<br />
 Endpoint:<br />
 POST /tracks<br />
--   tracker-service (8200): retrieves the plot data from kafka and generates tracks by running kalman or other tracker filters<br />
-
+-   tracker-service (8200): listens plot data from radar-plot kafka topic and publishes tracks to radar-track topic by running kalman or other tracker filters<br />
+-   map-viewer-service (8080) : listens the track data from radar-track topic and displays them in a radar scope by using Websocket to update them dynamically.
   </p>
 </p>
