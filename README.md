@@ -12,7 +12,7 @@
     <img src="https://cdn.pixabay.com/animation/2022/11/13/04/07/04-07-28-574_512.gif" alt="Logo" width="300" height="300">
     <h3 align="center">Microservices in radar track extraction</h3>
 <p>
-###    Spring Boot Applications
+    Spring Boot Applications
     <br />
 -   naming-service (8761): Eureka Server
 -   radar-service (8000): generating 2D plot data for 5 tracks with respect to 2nd degree of polynomial function<br />
