@@ -1,50 +1,46 @@
 package com.radartracker.mapviewerservice;
 
 import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.support.GenericMessage;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
-import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 @Component
 public class SocketTextHandler extends TextWebSocketHandler {
 	int counter = 0;
+	Logger logger = LoggerFactory.getLogger(SocketTextHandler.class);
+	
 	@Override
 	public void handleTextMessage(WebSocketSession session, TextMessage message)
 			throws InterruptedException, IOException {
+		session.sendMessage(new TextMessage("Hi  how may we help you?"));	
+	}
 
-		String payload = message.getPayload();
-		//JSONObject jsonObject = new JSONObject(payload);
+	@EventListener
+    private void handleSessionConnected(SessionConnectEvent event) {
+		logger.info("handleSessionConnected called");
+
+	}
+
+	@Override
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		
-		
-		 
+		logger.info("afterConnectionEstablished called");
 	}
 
 	
-	@EventListener
-    private void handleSessionConnected(SessionConnectEvent event) {
+	@Override
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+		logger.info("afterConnectionClosed called");
 		
-		ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
-		
-		event.
-		service.scheduleAtFixedRate(()->{ try {
-			session.sendMessage(new TextMessage("Hi " + ++counter + " how may we help you?"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		},0,1,TimeUnit.SECONDS);
-		
-    }
-
-    @EventListener
-    private void handleSessionDisconnect(SessionDisconnectEvent event) {
-    }
+	}
 }
