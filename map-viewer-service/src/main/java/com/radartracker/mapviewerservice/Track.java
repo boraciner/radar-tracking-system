@@ -9,7 +9,7 @@ public class Track implements Serializable{
 	private double vx;
 	private double vy;
 	private long trackId;
-	private LocalTime timeStamp;
+	private long timeStamp;
 	public double getX() {
 		return x;
 	}
@@ -40,13 +40,14 @@ public class Track implements Serializable{
 	public void setTrackId(long trackId) {
 		this.trackId = trackId;
 	}
-	public LocalTime getTimeStamp() {
+	
+	public long getTimeStamp() {
 		return timeStamp;
 	}
-	public void setTimeStamp(LocalTime timeStamp) {
+	public void setTimeStamp(long timeStamp) {
 		this.timeStamp = timeStamp;
 	}
-	public Track(double x, double y, double vx, double vy, long trackId, LocalTime timeStamp) {
+	public Track(double x, double y, double vx, double vy, long trackId, long timeStamp) {
 		super();
 		this.x = x;
 		this.y = y;

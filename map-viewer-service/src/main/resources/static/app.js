@@ -28,7 +28,7 @@ function sendData() {
 }
 
 function helloWorld(message) {
-	$("#helloworldmessage").append(" " + message + "");
+	$("#helloworldmessage").append(" " + message + "<br>");
 }
 
 $(function() {

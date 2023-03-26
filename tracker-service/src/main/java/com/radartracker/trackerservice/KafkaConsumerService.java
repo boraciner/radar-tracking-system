@@ -1,5 +1,9 @@
 package com.radartracker.trackerservice;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.zone.ZoneOffsetTransitionRule;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -17,7 +21,7 @@ public class KafkaConsumerService
 	{
 		System.out.println("Received '" + plot +"' from the PlotTopic." );
 		
-		Track track = new Track(plot.getX(), plot.getY(), 10, 10, 20, plot.getTimeStamp());
+		Track track = new Track(plot.getX(), plot.getY(), 10, 10, 20, plot.getTimeStamp().toEpochSecond(LocalDate.now(), ZoneOffset.UTC));
 		kafkaProducerService.sendMessage(track);
 		
 		
