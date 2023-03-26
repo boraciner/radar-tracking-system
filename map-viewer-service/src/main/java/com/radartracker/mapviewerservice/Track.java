@@ -1,8 +1,9 @@
 package com.radartracker.mapviewerservice;
 
+import java.io.Serializable;
 import java.time.LocalTime;
 
-public class Track {
+public class Track implements Serializable{
 	private double x;
 	private double y;
 	private double vx;
