@@ -29,7 +29,7 @@ public class KafkaConsumerService
 	Logger logger = LoggerFactory.getLogger(KafkaConsumerService.class);
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-	@KafkaListener(topics = "TrackTopic", groupId = "Group100",containerFactory = "TrackListener")	
+	@KafkaListener(topics = "TrackTopic", groupId = "Group100", containerFactory = "TrackListener")	
 	public void listen(Track track)
 	{
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -38,6 +38,22 @@ public class KafkaConsumerService
 		SocketTextHandler.activeSessions.stream().forEach(t->{
 			try {
 				t.sendMessage(new TextMessage(GSON.toJson(track)));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+	}
+	
+	@KafkaListener(topics = "PlotTopic", groupId = "Group101",containerFactory = "PlotListener")	
+	public void listen(Plot plot)
+	{
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+		System.out.println("Received '" + plot +"' from the PlotTopic." );
+		SocketTextHandler.activeSessions.stream().forEach(t->{
+			try {
+				t.sendMessage(new TextMessage(GSON.toJson(plot)));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

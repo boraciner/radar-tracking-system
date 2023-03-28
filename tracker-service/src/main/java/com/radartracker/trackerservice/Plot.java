@@ -8,7 +8,7 @@ public class Plot {
 
 	private double x;
 	private double y;
-	private LocalTime timeStamp;
+	private long timeStamp;
 	
 	
 	
@@ -24,17 +24,17 @@ public class Plot {
 	public void setY(double y) {
 		this.y = y;
 	}
-	public LocalTime getTimeStamp() {
+	public long getTimeStamp() {
 		return timeStamp;
 	}
-	public void setTimeStamp(LocalTime timeStamp) {
+	public void setTimeStamp(long timeStamp) {
 		this.timeStamp = timeStamp;
 	}
 	
 	public Plot() {
 		super();
 	}
-	public Plot( double x,  double y, LocalTime timeStamp) {
+	public Plot( double x,  double y, long timeStamp) {
 		super();
 		this.x = x;
 		this.y = y;

@@ -1,4 +1,8 @@
-package com.radartracker.radarservice;
+package com.radartracker.mapviewerservice;
+
+import java.time.LocalTime;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Plot {
 

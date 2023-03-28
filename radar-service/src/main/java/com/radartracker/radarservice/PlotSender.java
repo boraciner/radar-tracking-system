@@ -23,7 +23,7 @@ public class PlotSender {
 	@Scheduled(fixedRate = 1000)
 	public void reportCurrentTime() {
 		plotProxy.sendPlot(new Plot(x,
-				0.3 * Math.pow((x-1.6),2) + 0.7, 3, 4, LocalTime.now()));
+				0.3 * Math.pow((x-1.6),2) + 0.7, LocalTime.now().toSecondOfDay()));
 		x++;
 	}
 }

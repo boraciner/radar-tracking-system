@@ -21,7 +21,7 @@ public class KafkaConsumerService
 	{
 		System.out.println("Received '" + plot +"' from the PlotTopic." );
 		
-		Track track = new Track(plot.getX(), plot.getY(), 10, 10, 20, plot.getTimeStamp().toEpochSecond(LocalDate.now(), ZoneOffset.UTC));
+		Track track = new Track(plot.getX(), plot.getY(), 10, 10, 20, plot.getTimeStamp());
 		kafkaProducerService.sendMessage(track);
 		
 		

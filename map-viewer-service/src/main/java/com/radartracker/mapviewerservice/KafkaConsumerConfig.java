@@ -17,16 +17,17 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 @Configuration
 public class KafkaConsumerConfig
 {
-	public static final String GROUP_ID = "Group100";
+	public static final String TRACK_GROUP_ID = "Group100";
+	public static final String PLOT_GROUP_ID = "Group101";
 
 	@Bean
-	public ConsumerFactory<String, Track> consumerFactory()
+	public ConsumerFactory<String, Track> trackConsumerFactory()
 	{
 		// Creating a map of string-object type
 		Map<String, Object> config = new HashMap<>();
 		// Adding the Configuration
 		config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-		config.put(ConsumerConfig.GROUP_ID_CONFIG, GROUP_ID);
+		config.put(ConsumerConfig.GROUP_ID_CONFIG, TRACK_GROUP_ID);
 		config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 		config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 		// Returning message in JSON format
@@ -42,7 +43,34 @@ public class KafkaConsumerConfig
 	public ConcurrentKafkaListenerContainerFactory<String, Track> TrackListener()
 	{
 		ConcurrentKafkaListenerContainerFactory<String, Track> factory = new ConcurrentKafkaListenerContainerFactory<>();
-		factory.setConsumerFactory(consumerFactory());
+		factory.setConsumerFactory(trackConsumerFactory());
+		return factory;
+	}
+	
+	@Bean
+	public ConsumerFactory<String, Plot> plotConsumerFactory()
+	{
+		// Creating a map of string-object type
+		Map<String, Object> config = new HashMap<>();
+		// Adding the Configuration
+		config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+		config.put(ConsumerConfig.GROUP_ID_CONFIG, PLOT_GROUP_ID);
+		config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+		config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+		// Returning message in JSON format
+		
+		DefaultKafkaConsumerFactory<String, Plot> cf = new DefaultKafkaConsumerFactory<>(config,
+		        new StringDeserializer(), new JsonDeserializer<>(Plot.class, false));
+		
+		return cf;
+	}
+	
+	// Creating a Listener
+	@Bean
+	public ConcurrentKafkaListenerContainerFactory<String, Plot> PlotListener()
+	{
+		ConcurrentKafkaListenerContainerFactory<String, Plot> factory = new ConcurrentKafkaListenerContainerFactory<>();
+		factory.setConsumerFactory(plotConsumerFactory());
 		return factory;
 	}
 }
