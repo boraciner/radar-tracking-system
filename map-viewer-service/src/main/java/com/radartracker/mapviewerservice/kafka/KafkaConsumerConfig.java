@@ -1,4 +1,4 @@
-package com.radartracker.mapviewerservice;
+package com.radartracker.mapviewerservice.kafka;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +12,9 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+
+import com.radartracker.mapviewerservice.model.Plot;
+import com.radartracker.mapviewerservice.model.Track;
 
 @EnableKafka
 @Configuration

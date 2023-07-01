@@ -1,4 +1,4 @@
-package com.radartracker.mapviewerservice;
+package com.radartracker.mapviewerservice.model;
 
 import java.time.LocalTime;
 

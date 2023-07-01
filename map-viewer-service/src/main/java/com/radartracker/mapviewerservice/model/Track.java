@@ -1,13 +1,17 @@
-package com.radartracker.mapviewerservice;
+package com.radartracker.mapviewerservice.model;
 
 import java.io.Serializable;
-import java.time.LocalTime;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
 public class Track implements Serializable{
 	private double x;
 	private double y;
 	private double vx;
 	private double vy;
+	@Id
 	private long trackId;
 	private long timeStamp;
 	public double getX() {

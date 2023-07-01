@@ -1,4 +1,4 @@
-package com.radartracker.mapviewerservice;
+package com.radartracker.mapviewerservice.kafka;
 
 import java.io.IOException;
 
@@ -7,6 +7,7 @@ import org.springframework.boot.jackson.JsonComponent;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.radartracker.mapviewerservice.model.Track;
 
 @JsonComponent
 public class TrackConverter {

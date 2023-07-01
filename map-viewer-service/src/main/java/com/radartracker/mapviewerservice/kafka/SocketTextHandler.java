@@ -1,4 +1,4 @@
-package com.radartracker.mapviewerservice;
+package com.radartracker.mapviewerservice.kafka;
 
 import java.io.IOException;
 import java.util.ArrayList;

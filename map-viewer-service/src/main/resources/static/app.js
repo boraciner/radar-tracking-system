@@ -16,7 +16,17 @@ function disconnect() {
 
 
 function sendTrackMessage(message) {
-	$("#trackdetails").append(" " + message + "<br>");
+	//var track = JSON.parse(message)
+	$("#trackdetails").append(" " + 
+'	<div class=\"card\">\
+    <div class=\"card-body\">\
+    <h5 class=\"card-title\">Card title</h5>\
+    <p class=\"card-text\">Some quick example text to build on the card title and make up the bulk of the cards content.</p>\
+  </div>\
+</div>\
+'
+	
+	+ "<br>");
 }
 
 $(function() {
