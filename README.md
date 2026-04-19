@@ -241,9 +241,9 @@ Or manually with Gradle, **in this order**:
 
 | URL | Page |
 |:----|:-----|
-| `http://localhost:8080` | 🎯 Live radar scope |
-| `http://localhost:8400` | 🗺️ Scenario editor |
-| `http://localhost:8761` | 🔍 Eureka dashboard |
+| `http://localhost:8080` |  Live radar scope |
+| `http://localhost:8400` |  Scenario editor |
+| `http://localhost:8761` |  Eureka dashboard |
 
 ---
 
