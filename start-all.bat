@@ -27,18 +27,14 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 REM ─────────────────────────────────────────────
-REM  CHECK 2: Maven
+REM  CHECK 2: Gradle wrapper present
 REM ─────────────────────────────────────────────
-echo [CHECK 2/4] Maven...
-mvn -version >nul 2>&1
-if %ERRORLEVEL% NEQ 0 (
-    echo   [FAIL] Maven not found in PATH.
-    echo          Install via: scoop install maven  or  choco install maven
+echo [CHECK 2/4] Gradle wrapper...
+if not exist "%ROOT%gradlew.bat" (
+    echo   [FAIL] gradlew.bat not found. Run: gradle wrapper --gradle-version=9.4.1
     set ERRORS=1
 ) else (
-    for /f "tokens=3" %%v in ('mvn -version 2^>^&1 ^| findstr /i "Apache Maven"') do (
-        echo   [OK]   Maven found: %%v
-    )
+    echo   [OK]   gradlew.bat found.
 )
 
 REM ─────────────────────────────────────────────
@@ -95,10 +91,10 @@ echo  All checks passed. Starting services...
 echo.
 
 REM ─────────────────────────────────────────────
-REM  START SERVICES
+REM  START SERVICES  (Gradle bootRun)
 REM ─────────────────────────────────────────────
 echo [1/5] naming-service    (Eureka :8761)
-start "naming-service" cmd /k "cd /d %ROOT%naming-service && mvn spring-boot:run"
+start "naming-service" cmd /k "cd /d %ROOT% && gradlew.bat :naming-service:bootRun"
 
 echo        Waiting for Eureka to be ready...
 :wait_eureka
@@ -109,19 +105,19 @@ echo        Eureka is up.
 echo.
 
 echo [2/5] plot-listener-service (:8100)
-start "plot-listener-service" cmd /k "cd /d %ROOT%plot-listener-service && mvn spring-boot:run"
+start "plot-listener-service" cmd /k "cd /d %ROOT% && gradlew.bat :plot-listener-service:bootRun"
 timeout /t 5 /nobreak >nul
 
 echo [3/5] tracker-service       (:8200)
-start "tracker-service" cmd /k "cd /d %ROOT%tracker-service && mvn spring-boot:run"
+start "tracker-service" cmd /k "cd /d %ROOT% && gradlew.bat :tracker-service:bootRun"
 timeout /t 5 /nobreak >nul
 
 echo [4/5] map-viewer-service    (:8080)
-start "map-viewer-service" cmd /k "cd /d %ROOT%map-viewer-service && mvn spring-boot:run"
+start "map-viewer-service" cmd /k "cd /d %ROOT% && gradlew.bat :map-viewer-service:bootRun"
 timeout /t 5 /nobreak >nul
 
 echo [5/5] radar-service         (:8000)  ^<-- starts last so pipeline is ready
-start "radar-service" cmd /k "cd /d %ROOT%radar-service && mvn spring-boot:run"
+start "radar-service" cmd /k "cd /d %ROOT% && gradlew.bat :radar-service:bootRun"
 
 echo.
 echo  ==========================================
@@ -132,6 +128,11 @@ echo    Radar scope UI  :  http://localhost:8080/index.html
 echo    Eureka dashboard:  http://localhost:8761
 echo.
 echo  Tip: close any service window to stop that service.
+echo.
+echo  Useful Gradle tasks:
+echo    gradlew build             -- compile + test all services
+echo    gradlew checkVersions     -- check for dependency updates
+echo    gradlew :service:bootRun  -- start a single service
 echo.
 
 endlocal

@@ -1,0 +1,13 @@
+[versions]
+springBoot    = "3.5.3"
+springCloud   = "2025.0.0"
+springDepMgmt = "1.1.7"
+commonsMath3  = "3.6.1"
+java          = "21"
+
+[libraries]
+commonsMath3 = { module = "org.apache.commons:commons-math3", version.ref = "commonsMath3" }
+
+[plugins]
+springBoot    = { id = "org.springframework.boot",         version.ref = "springBoot" }
+springDepMgmt = { id = "io.spring.dependency-management",  version.ref = "springDepMgmt" }
