@@ -17,25 +17,25 @@
 
 ---
 
-## ✨ What It Does
+##  What It Does
 
 Three synthetic radar targets move across the screen simultaneously. Each target generates noisy position measurements every second. A Kalman filter tracker associates measurements to targets and produces clean smoothed tracks. A threat assessment engine scores each track for proximity and closing speed against a defended asset, classifies it (FRIENDLY → HOSTILE), and colours the radar scope accordingly. An IFF zone system lets you designate friendly, restricted and hostile airspace. A scenario editor UI lets you reposition the asset, paint IFF zones and inject ECM jamming modes — all without restarting anything.
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```mermaid
 flowchart LR
-    RS([🛰️ radar-service\n:8000])
-    PL([📡 plot-listener-service\n:8100])
-    KF([🧮 tracker-service\n:8200])
-    TA([⚠️ threat-assessment-service\n:8300])
-    MV([🖥️ map-viewer-service\n:8080])
-    SE([🗺️ scenario-editor-service\n:8400])
-    EU([🔍 naming-service\nEureka :8761])
+    RS([ radar-service\n:8000])
+    PL([ plot-listener-service\n:8100])
+    KF([ tracker-service\n:8200])
+    TA([ threat-assessment-service\n:8300])
+    MV([ map-viewer-service\n:8080])
+    SE([ scenario-editor-service\n:8400])
+    EU([ naming-service\nEureka :8761])
     K[(Apache Kafka)]
-    BR([🌐 Browser])
+    BR([ Browser])
 
     RS -- "POST /plots" --> PL
     PL -- "PlotTopic" --> K
@@ -51,7 +51,7 @@ flowchart LR
 
 ---
 
-## 🧩 Services
+##  Services
 
 | Service | Port | Description |
 |:--------|:----:|:------------|
@@ -65,7 +65,7 @@ flowchart LR
 
 ---
 
-## 🔬 Kalman Filter Tracker
+##  Kalman Filter Tracker
 
 The tracker uses a **2D constant-velocity model** with nearest-neighbour data association.
 
@@ -95,7 +95,7 @@ New plot  ──►  TENTATIVE  ──( 3 hits )──►  CONFIRMED  ──( 5 
 
 ---
 
-## ⚠️ Threat Assessment Engine
+##  Threat Assessment Engine
 
 Each confirmed track is scored against the **defended asset** (default position 5, 5) on two components:
 
@@ -119,7 +119,7 @@ IFF zone membership overrides the score: a track inside a **FRIENDLY** zone → 
 
 ---
 
-## 🛡️ IFF Zones
+##  IFF Zones
 
 Zones are managed via REST (`threat-assessment-service :8300`):
 
@@ -135,7 +135,7 @@ Zone types: **FRIENDLY** (green), **RESTRICTED** (yellow), **HOSTILE** (red).
 
 ---
 
-## 📡 ECM Simulation
+##  ECM Simulation
 
 ECM mode is set via `radar-service :8000`:
 
@@ -150,7 +150,7 @@ Switch mode via the Scenario Editor or `POST /ecm {"mode": "BARRAGE"}`.
 
 ---
 
-## 📡 Simulated Targets
+##  Simulated Targets
 
 | Target | Trajectory | Starting X |
 |:------:|:-----------|:----------:|
@@ -162,7 +162,7 @@ Each target sweeps `x = 0 → 10` (step 0.2/s), then wraps back to 0 for continu
 
 ---
 
-## 🖥️ Radar Scope UI
+## Radar Scope UI
 
 Open **`http://localhost:8080`** after starting all services.
 
@@ -185,7 +185,7 @@ WebSocket auto-reconnects. ECM / zone / asset state auto-refreshes every 5 s.
 
 ---
 
-## 🗺️ Scenario Editor
+##  Scenario Editor
 
 Open **`http://localhost:8400`** to edit the live scenario.
 
@@ -198,7 +198,7 @@ Changes take effect immediately — the radar scope and threat assessor pick the
 
 ---
 
-## 📨 Kafka Topics
+##  Kafka Topics
 
 | Topic | Producer | Consumers |
 |:------|:---------|:----------|
@@ -208,7 +208,7 @@ Changes take effect immediately — the radar scope and threat assessor pick the
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 **Prerequisites:** Java 21, Docker
 
@@ -247,7 +247,7 @@ Or manually with Gradle, **in this order**:
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 radar-tracking-system/
@@ -276,7 +276,7 @@ radar-tracking-system/
 
 ---
 
-## 🛠️ Useful Gradle Tasks
+##  Useful Gradle Tasks
 
 ```bash
 ./gradlew build                    # compile + test all 7 services
