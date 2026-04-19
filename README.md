@@ -13,7 +13,7 @@
 
 > Simulate radar sensors → stream plots through Kafka → filter with a Kalman tracker → assess threats → visualise everything live on a canvas radar scope.
 
-<img src="radar-service/src/main/resources/Animation.gif" alt="Radar Tracking System Demo" width="780" style="border-radius: 12px; margin: 24px 0;" />
+<img src="Animation.gif" alt="Radar Tracking System Demo" width="780" style="border-radius: 12px; margin: 24px 0;" />
 
 </div>
 
