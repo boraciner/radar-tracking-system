@@ -1,50 +1,48 @@
 package com.radartracker.mapviewerservice.kafka;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-import org.springframework.web.socket.messaging.SessionConnectEvent;
 
 @Component
 public class SocketTextHandler extends TextWebSocketHandler {
-	int counter = 0;
-	Logger logger = LoggerFactory.getLogger(SocketTextHandler.class);
-	static ArrayList<WebSocketSession> activeSessions = new ArrayList<WebSocketSession>();
-	
-	
-	@Override
-	public void handleTextMessage(WebSocketSession session, TextMessage message)
-			throws InterruptedException, IOException {
-		session.sendMessage(new TextMessage("Hi  how may we help you?"));	
-	}
 
-	@EventListener
-    private void handleSessionConnected(SessionConnectEvent event) {
-		logger.info("handleSessionConnected called");
-		
-	}
+    private static final Logger log = LoggerFactory.getLogger(SocketTextHandler.class);
+    private final CopyOnWriteArrayList<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
 
-	@Override
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		activeSessions.add(session);
-		
-		logger.info("afterConnectionEstablished called activeSessions.size:"+activeSessions.size());
-		session.sendMessage(new TextMessage("afterConnectionEstablished called"));
-	}
+    @Override
+    public void afterConnectionEstablished(WebSocketSession session) {
+        sessions.add(session);
+        log.info("Client connected: {} (total: {})", session.getId(), sessions.size());
+    }
 
-	
-	@Override
-	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-		activeSessions.remove(session);
-		logger.info("afterConnectionClosed called activeSessions.size:"+activeSessions.size());
-		
-	}
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+        sessions.remove(session);
+        log.info("Client disconnected: {} (total: {})", session.getId(), sessions.size());
+    }
+
+    @Override
+    public void handleTextMessage(WebSocketSession session, TextMessage message) {
+        // no inbound messages expected from the client
+    }
+
+    public void broadcast(TextMessage message) {
+        for (WebSocketSession session : sessions) {
+            if (session.isOpen()) {
+                try {
+                    session.sendMessage(message);
+                } catch (IOException e) {
+                    log.warn("Could not send to session {}: {}", session.getId(), e.getMessage());
+                }
+            }
+        }
+    }
 }

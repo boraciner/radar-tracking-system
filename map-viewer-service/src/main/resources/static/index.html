@@ -1,17 +1,135 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Radar Tracker Map View</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/jquery-1.10.2.min.js"></script>
-    <script src="/app.js" defer></script>
+    <title>Radar Tracking System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #0a0a0f; color: #cdd6f4; font-family: 'Courier New', monospace; }
+
+        #scope {
+            background: #050510;
+            border: 1px solid #313244;
+            border-radius: 4px;
+            display: block;
+        }
+
+        .panel {
+            background: #11111b;
+            border: 1px solid #313244;
+            border-radius: 4px;
+            padding: 16px;
+        }
+
+        .panel h6 {
+            color: #89b4fa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 11px;
+            margin-bottom: 12px;
+        }
+
+        .form-check-label { font-size: 13px; cursor: pointer; }
+        .form-check-input { cursor: pointer; }
+
+        .legend-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .legend-x   { color: #f9e2af; font-weight: bold; margin-right: 6px; }
+        .legend-tri { color: #a6e3a1; font-weight: bold; margin-right: 6px; }
+
+        #status-badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #cba6f7;
+        }
+        .stat-label {
+            font-size: 10px;
+            color: #6c7086;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
 </head>
 <body>
-<span id="trackdetails"> </span>
+<div class="container-fluid py-3">
 
+    <div class="d-flex align-items-center mb-3 gap-3">
+        <h5 class="mb-0" style="color:#89b4fa;">RADAR TRACKING SYSTEM</h5>
+        <span id="status-badge" class="badge bg-danger">DISCONNECTED</span>
+    </div>
+
+    <div class="row g-3">
+
+        <!-- Canvas -->
+        <div class="col-auto">
+            <canvas id="scope" width="700" height="700"></canvas>
+        </div>
+
+        <!-- Side panel -->
+        <div class="col">
+            <div class="panel mb-3">
+                <h6>Layers</h6>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="chk-plots" checked>
+                    <label class="form-check-label" for="chk-plots">
+                        <span class="legend-x">×</span> Raw Plots
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="chk-tracks" checked>
+                    <label class="form-check-label" for="chk-tracks">
+                        <span class="legend-dot" style="background:#89b4fa;border:2px solid #89b4fa;"></span>Tracked Positions
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="chk-truth" checked>
+                    <label class="form-check-label" for="chk-truth">
+                        <span class="legend-tri">▲</span> Ground Truth
+                    </label>
+                </div>
+            </div>
+
+            <div class="panel mb-3">
+                <h6>Statistics</h6>
+                <div class="row text-center g-2">
+                    <div class="col-6">
+                        <div class="stat-value" id="stat-tracks">0</div>
+                        <div class="stat-label">Active Tracks</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-value" id="stat-plots">0</div>
+                        <div class="stat-label">Total Plots</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel mb-3">
+                <h6>Target Colours</h6>
+                <div id="target-legend" style="font-size:12px;"></div>
+            </div>
+
+            <div class="panel">
+                <h6>Active Tracks</h6>
+                <div id="track-list" style="font-size:11px; max-height:200px; overflow-y:auto;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/app.js"></script>
 </body>
 </html>
