@@ -19,5 +19,7 @@ include(
     "radar-service",
     "plot-listener-service",
     "tracker-service",
-    "map-viewer-service"
+    "threat-assessment-service",
+    "map-viewer-service",
+    "scenario-editor-service"
 )

@@ -2,6 +2,7 @@ package com.radartracker.mapviewerservice.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.radartracker.mapviewerservice.model.Plot;
+import com.radartracker.mapviewerservice.model.ThreatAssessment;
 import com.radartracker.mapviewerservice.model.Track;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,31 +16,30 @@ public class KafkaConsumerService {
 
     private static final Logger log = LoggerFactory.getLogger(KafkaConsumerService.class);
 
-    @Autowired
-    private SocketTextHandler socketTextHandler;
+    @Autowired private SocketTextHandler socketTextHandler;
+    @Autowired private ObjectMapper      objectMapper;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @KafkaListener(topics = "TrackTopic", groupId = "Group100", containerFactory = "TrackListener")
+    @KafkaListener(topics = "TrackTopic",  groupId = "Group100", containerFactory = "TrackListener")
     public void onTrack(Track track) {
-        log.debug("Track received: {}", track);
         broadcast(new WebSocketMessage("TRACK", track));
     }
 
-    @KafkaListener(topics = "PlotTopic", groupId = "Group101", containerFactory = "PlotListener")
+    @KafkaListener(topics = "PlotTopic",   groupId = "Group101", containerFactory = "PlotListener")
     public void onPlot(Plot plot) {
-        log.debug("Plot received: {}", plot);
         broadcast(new WebSocketMessage("PLOT", plot));
+    }
+
+    @KafkaListener(topics = "ThreatTopic", groupId = "Group102", containerFactory = "ThreatListener")
+    public void onThreat(ThreatAssessment threat) {
+        log.debug("Threat received: track={} level={}", threat.getTrackId(), threat.getLevel());
+        broadcast(new WebSocketMessage("THREAT", threat));
     }
 
     private void broadcast(WebSocketMessage message) {
         try {
-            String json = objectMapper.writeValueAsString(message);
-            TextMessage wsMsg = new TextMessage(json);
-            socketTextHandler.broadcast(wsMsg);
+            socketTextHandler.broadcast(new TextMessage(objectMapper.writeValueAsString(message)));
         } catch (Exception e) {
-            log.error("Failed to broadcast message", e);
+            log.error("Broadcast failed", e);
         }
     }
 }

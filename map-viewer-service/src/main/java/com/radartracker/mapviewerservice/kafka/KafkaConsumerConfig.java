@@ -1,6 +1,7 @@
 package com.radartracker.mapviewerservice.kafka;
 
 import com.radartracker.mapviewerservice.model.Plot;
+import com.radartracker.mapviewerservice.model.ThreatAssessment;
 import com.radartracker.mapviewerservice.model.Track;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -19,9 +20,10 @@ import java.util.Map;
 @Configuration
 public class KafkaConsumerConfig {
 
-    public static final String TRACK_GROUP_ID = "Group100";
-    public static final String PLOT_GROUP_ID  = "Group101";
-    private static final String BOOTSTRAP     = "localhost:9092";
+    private static final String BOOTSTRAP       = "localhost:9092";
+    public  static final String TRACK_GROUP_ID  = "Group100";
+    public  static final String PLOT_GROUP_ID   = "Group101";
+    public  static final String THREAT_GROUP_ID = "Group102";
 
     @Bean
     public ConsumerFactory<String, Track> trackConsumerFactory() {
@@ -29,16 +31,14 @@ public class KafkaConsumerConfig {
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP);
         config.put(ConsumerConfig.GROUP_ID_CONFIG, TRACK_GROUP_ID);
         return new DefaultKafkaConsumerFactory<>(config,
-                new StringDeserializer(),
-                new JsonDeserializer<>(Track.class, false));
+                new StringDeserializer(), new JsonDeserializer<>(Track.class, false));
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, Track> TrackListener() {
-        ConcurrentKafkaListenerContainerFactory<String, Track> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(trackConsumerFactory());
-        return factory;
+        var f = new ConcurrentKafkaListenerContainerFactory<String, Track>();
+        f.setConsumerFactory(trackConsumerFactory());
+        return f;
     }
 
     @Bean
@@ -47,15 +47,29 @@ public class KafkaConsumerConfig {
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP);
         config.put(ConsumerConfig.GROUP_ID_CONFIG, PLOT_GROUP_ID);
         return new DefaultKafkaConsumerFactory<>(config,
-                new StringDeserializer(),
-                new JsonDeserializer<>(Plot.class, false));
+                new StringDeserializer(), new JsonDeserializer<>(Plot.class, false));
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, Plot> PlotListener() {
-        ConcurrentKafkaListenerContainerFactory<String, Plot> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(plotConsumerFactory());
-        return factory;
+        var f = new ConcurrentKafkaListenerContainerFactory<String, Plot>();
+        f.setConsumerFactory(plotConsumerFactory());
+        return f;
+    }
+
+    @Bean
+    public ConsumerFactory<String, ThreatAssessment> threatConsumerFactory() {
+        Map<String, Object> config = new HashMap<>();
+        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP);
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, THREAT_GROUP_ID);
+        return new DefaultKafkaConsumerFactory<>(config,
+                new StringDeserializer(), new JsonDeserializer<>(ThreatAssessment.class, false));
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ThreatAssessment> ThreatListener() {
+        var f = new ConcurrentKafkaListenerContainerFactory<String, ThreatAssessment>();
+        f.setConsumerFactory(threatConsumerFactory());
+        return f;
     }
 }

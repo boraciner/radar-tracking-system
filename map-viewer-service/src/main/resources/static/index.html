@@ -7,68 +7,34 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background: #0a0a0f; color: #cdd6f4; font-family: 'Courier New', monospace; }
-
-        #scope {
-            background: #050510;
-            border: 1px solid #313244;
-            border-radius: 4px;
-            display: block;
-        }
-
-        .panel {
-            background: #11111b;
-            border: 1px solid #313244;
-            border-radius: 4px;
-            padding: 16px;
-        }
-
-        .panel h6 {
-            color: #89b4fa;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 11px;
-            margin-bottom: 12px;
-        }
-
-        .form-check-label { font-size: 13px; cursor: pointer; }
-        .form-check-input { cursor: pointer; }
-
-        .legend-dot {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-
-        .legend-x   { color: #f9e2af; font-weight: bold; margin-right: 6px; }
-        .legend-tri { color: #a6e3a1; font-weight: bold; margin-right: 6px; }
-
-        #status-badge {
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 10px;
-        }
-
-        .stat-value {
-            font-size: 22px;
-            font-weight: bold;
-            color: #cba6f7;
-        }
-        .stat-label {
-            font-size: 10px;
-            color: #6c7086;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        #scope { background: #050510; border: 1px solid #313244; border-radius: 4px; display: block; }
+        .panel { background: #11111b; border: 1px solid #313244; border-radius: 4px; padding: 14px; margin-bottom: 10px; }
+        .panel h6 { color: #89b4fa; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; margin-bottom: 10px; }
+        .form-check-label { font-size: 12px; cursor: pointer; }
+        .stat-value { font-size: 20px; font-weight: bold; color: #cba6f7; }
+        .stat-label { font-size: 10px; color: #6c7086; text-transform: uppercase; letter-spacing: 1px; }
+        #status-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+        #ecm-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+        .threat-FRIENDLY  { color: #a6e3a1; }
+        .threat-NEUTRAL   { color: #cdd6f4; }
+        .threat-UNKNOWN   { color: #f9e2af; }
+        .threat-SUSPECT   { color: #fab387; }
+        .threat-HOSTILE   { color: #f38ba8; }
+        .threat-count { display: inline-block; min-width: 22px; text-align: right; font-weight: bold; }
+        .link-editor { font-size: 11px; color: #585b70; text-decoration: none; }
+        .link-editor:hover { color: #89b4fa; }
+        #zone-list-panel { font-size: 11px; max-height: 120px; overflow-y: auto; }
+        #track-list { font-size: 11px; max-height: 180px; overflow-y: auto; }
     </style>
 </head>
 <body>
 <div class="container-fluid py-3">
 
-    <div class="d-flex align-items-center mb-3 gap-3">
+    <div class="d-flex align-items-center mb-3 gap-3 flex-wrap">
         <h5 class="mb-0" style="color:#89b4fa;">RADAR TRACKING SYSTEM</h5>
         <span id="status-badge" class="badge bg-danger">DISCONNECTED</span>
+        <span id="ecm-badge"    class="badge bg-secondary">ECM: —</span>
+        <a href="http://localhost:8400" target="_blank" class="link-editor ms-auto">⚙ Scenario Editor →</a>
     </div>
 
     <div class="row g-3">
@@ -79,51 +45,72 @@
         </div>
 
         <!-- Side panel -->
-        <div class="col">
-            <div class="panel mb-3">
+        <div class="col" style="min-width:220px; max-width:280px;">
+
+            <div class="panel">
                 <h6>Layers</h6>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox" id="chk-plots" checked>
-                    <label class="form-check-label" for="chk-plots">
-                        <span class="legend-x">×</span> Raw Plots
-                    </label>
+                <div class="form-check mb-1">
+                    <input class="form-check-input" type="checkbox" id="chk-plots"  checked>
+                    <label class="form-check-label" for="chk-plots">× Raw Plots</label>
                 </div>
-                <div class="form-check mb-2">
+                <div class="form-check mb-1">
                     <input class="form-check-input" type="checkbox" id="chk-tracks" checked>
-                    <label class="form-check-label" for="chk-tracks">
-                        <span class="legend-dot" style="background:#89b4fa;border:2px solid #89b4fa;"></span>Tracked Positions
-                    </label>
+                    <label class="form-check-label" for="chk-tracks">○ Kalman Tracks</label>
+                </div>
+                <div class="form-check mb-1">
+                    <input class="form-check-input" type="checkbox" id="chk-truth"  checked>
+                    <label class="form-check-label" for="chk-truth">▲ Ground Truth</label>
+                </div>
+                <div class="form-check mb-1">
+                    <input class="form-check-input" type="checkbox" id="chk-zones"  checked>
+                    <label class="form-check-label" for="chk-zones">⬤ IFF Zones</label>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="chk-truth" checked>
-                    <label class="form-check-label" for="chk-truth">
-                        <span class="legend-tri">▲</span> Ground Truth
-                    </label>
+                    <input class="form-check-input" type="checkbox" id="chk-asset"  checked>
+                    <label class="form-check-label" for="chk-asset">★ Defended Asset</label>
                 </div>
             </div>
 
-            <div class="panel mb-3">
+            <div class="panel">
                 <h6>Statistics</h6>
-                <div class="row text-center g-2">
+                <div class="row text-center g-1">
                     <div class="col-6">
                         <div class="stat-value" id="stat-tracks">0</div>
-                        <div class="stat-label">Active Tracks</div>
+                        <div class="stat-label">Tracks</div>
                     </div>
                     <div class="col-6">
                         <div class="stat-value" id="stat-plots">0</div>
-                        <div class="stat-label">Total Plots</div>
+                        <div class="stat-label">Plots</div>
                     </div>
                 </div>
             </div>
 
-            <div class="panel mb-3">
-                <h6>Target Colours</h6>
-                <div id="target-legend" style="font-size:12px;"></div>
+            <div class="panel">
+                <h6>Threat Summary</h6>
+                <div style="font-size:12px; line-height:1.8;">
+                    <div class="threat-HOSTILE" >■ <span class="threat-count" id="cnt-HOSTILE" >0</span> HOSTILE</div>
+                    <div class="threat-SUSPECT" >■ <span class="threat-count" id="cnt-SUSPECT" >0</span> SUSPECT</div>
+                    <div class="threat-UNKNOWN" >■ <span class="threat-count" id="cnt-UNKNOWN" >0</span> UNKNOWN</div>
+                    <div class="threat-NEUTRAL" >■ <span class="threat-count" id="cnt-NEUTRAL" >0</span> NEUTRAL</div>
+                    <div class="threat-FRIENDLY">■ <span class="threat-count" id="cnt-FRIENDLY">0</span> FRIENDLY</div>
+                </div>
             </div>
 
             <div class="panel">
                 <h6>Active Tracks</h6>
-                <div id="track-list" style="font-size:11px; max-height:200px; overflow-y:auto;"></div>
+                <div id="track-list"></div>
+            </div>
+
+            <div class="panel">
+                <h6>IFF Zones</h6>
+                <div id="zone-list-panel">
+                    <span style="color:#585b70; font-size:11px;">No zones — use Scenario Editor</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h6>Target Colours</h6>
+                <div id="target-legend" style="font-size:12px;"></div>
             </div>
         </div>
     </div>

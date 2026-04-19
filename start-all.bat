@@ -93,7 +93,7 @@ echo.
 REM ─────────────────────────────────────────────
 REM  START SERVICES  (Gradle bootRun)
 REM ─────────────────────────────────────────────
-echo [1/5] naming-service    (Eureka :8761)
+echo [1/7] naming-service    (Eureka :8761)
 start "naming-service" cmd /k "cd /d %ROOT% && gradlew.bat :naming-service:bootRun"
 
 echo        Waiting for Eureka to be ready...
@@ -104,19 +104,27 @@ if %ERRORLEVEL% NEQ 0 goto wait_eureka
 echo        Eureka is up.
 echo.
 
-echo [2/5] plot-listener-service (:8100)
+echo [2/5] plot-listener-service     (:8100)
 start "plot-listener-service" cmd /k "cd /d %ROOT% && gradlew.bat :plot-listener-service:bootRun"
 timeout /t 5 /nobreak >nul
 
-echo [3/5] tracker-service       (:8200)
+echo [3/5] tracker-service           (:8200)
 start "tracker-service" cmd /k "cd /d %ROOT% && gradlew.bat :tracker-service:bootRun"
 timeout /t 5 /nobreak >nul
 
-echo [4/5] map-viewer-service    (:8080)
+echo [4/5] threat-assessment-service (:8300)
+start "threat-assessment-service" cmd /k "cd /d %ROOT% && gradlew.bat :threat-assessment-service:bootRun"
+timeout /t 5 /nobreak >nul
+
+echo [5/5] map-viewer-service        (:8080)
 start "map-viewer-service" cmd /k "cd /d %ROOT% && gradlew.bat :map-viewer-service:bootRun"
 timeout /t 5 /nobreak >nul
 
-echo [5/5] radar-service         (:8000)  ^<-- starts last so pipeline is ready
+echo [6/6] scenario-editor-service   (:8400)
+start "scenario-editor-service" cmd /k "cd /d %ROOT% && gradlew.bat :scenario-editor-service:bootRun"
+timeout /t 5 /nobreak >nul
+
+echo [7/7] radar-service             (:8000)  ^<-- starts last so pipeline is ready
 start "radar-service" cmd /k "cd /d %ROOT% && gradlew.bat :radar-service:bootRun"
 
 echo.
@@ -124,8 +132,9 @@ echo  ==========================================
 echo    All services launched.
 echo  ==========================================
 echo.
-echo    Radar scope UI  :  http://localhost:8080/index.html
-echo    Eureka dashboard:  http://localhost:8761
+echo    Radar scope UI    :  http://localhost:8080/index.html
+echo    Scenario Editor   :  http://localhost:8400
+echo    Eureka dashboard  :  http://localhost:8761
 echo.
 echo  Tip: close any service window to stop that service.
 echo.

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Radar Scenario Editor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #0a0a0f; color: #cdd6f4; font-family: 'Courier New', monospace; }
+        canvas { background: #050510; border: 1px solid #313244; border-radius: 4px; display: block; cursor: crosshair; }
+        .panel { background: #11111b; border: 1px solid #313244; border-radius: 4px; padding: 14px; margin-bottom: 12px; }
+        .panel h6 { color: #89b4fa; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; margin-bottom: 10px; }
+        .btn-tool { font-size: 11px; padding: 4px 10px; border-radius: 3px; cursor: pointer; border: 1px solid #45475a; background: #1e1e2e; color: #cdd6f4; }
+        .btn-tool.active { border-color: #89b4fa; color: #89b4fa; background: #1e2a3a; }
+        select, input[type=text], input[type=number] {
+            background: #1e1e2e; border: 1px solid #45475a; color: #cdd6f4;
+            border-radius: 3px; padding: 4px 8px; font-size: 12px; font-family: 'Courier New', monospace;
+        }
+        select:focus, input:focus { outline: none; border-color: #89b4fa; }
+        .zone-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #1e1e2e; font-size: 11px; }
+        .zone-item:last-child { border-bottom: none; }
+        .btn-del { background: none; border: none; color: #f38ba8; cursor: pointer; font-size: 14px; padding: 0 4px; }
+        .ecm-badge { font-size: 10px; padding: 2px 7px; border-radius: 8px; }
+        .ecm-NONE    { background: #1e3a2e; color: #a6e3a1; }
+        .ecm-BARRAGE { background: #3a1e2e; color: #f38ba8; }
+        .ecm-SPOT    { background: #3a2a1e; color: #fab387; }
+        .ecm-DRFM    { background: #2a1e3a; color: #cba6f7; }
+        #canvas-hint { font-size: 10px; color: #585b70; margin-top: 4px; text-align: center; }
+    </style>
+</head>
+<body>
+<div class="container-fluid py-3">
+    <div class="d-flex align-items-center mb-3 gap-3">
+        <h5 class="mb-0" style="color:#89b4fa;">SCENARIO EDITOR</h5>
+        <span id="svc-status" class="badge bg-secondary" style="font-size:10px;">CHECKING...</span>
+    </div>
+
+    <div class="row g-3">
+        <!-- Canvas -->
+        <div class="col-auto">
+            <canvas id="editor" width="620" height="620"></canvas>
+            <div id="canvas-hint">Click to place — coordinate shown on hover</div>
+            <div id="coord-display" style="font-size:11px; color:#6c7086; margin-top:2px; text-align:center;">—</div>
+        </div>
+
+        <!-- Controls -->
+        <div class="col" style="min-width:260px; max-width:320px;">
+
+            <!-- Active Tool -->
+            <div class="panel">
+                <h6>Active Tool</h6>
+                <div class="d-flex gap-2 mb-2">
+                    <button id="tool-asset" class="btn-tool active" onclick="setTool('asset')">★ Place Asset</button>
+                    <button id="tool-zone"  class="btn-tool"        onclick="setTool('zone')">⬤ Add IFF Zone</button>
+                </div>
+                <div id="zone-params" style="display:none; margin-top:8px;">
+                    <div class="mb-1"><label style="font-size:11px; color:#6c7086;">Zone Name</label>
+                        <input id="zone-name" type="text" placeholder="Zone-1" style="width:100%; margin-top:2px;">
+                    </div>
+                    <div class="d-flex gap-2 mt-1">
+                        <div style="flex:1"><label style="font-size:11px; color:#6c7086;">Radius</label>
+                            <input id="zone-radius" type="number" value="1.5" step="0.1" min="0.3" max="5" style="width:100%; margin-top:2px;">
+                        </div>
+                        <div style="flex:1"><label style="font-size:11px; color:#6c7086;">Type</label>
+                            <select id="zone-type" style="width:100%; margin-top:2px;">
+                                <option value="FRIENDLY">FRIENDLY</option>
+                                <option value="RESTRICTED">RESTRICTED</option>
+                                <option value="HOSTILE" selected>HOSTILE</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ECM Control -->
+            <div class="panel">
+                <h6>ECM Control</h6>
+                <select id="ecm-mode" style="width:100%; margin-bottom:8px;">
+                    <option value="NONE">NONE — Normal operation</option>
+                    <option value="BARRAGE">BARRAGE — Heavy noise + false alarms</option>
+                    <option value="SPOT">SPOT — Western sector blanked (x &lt; 4)</option>
+                    <option value="DRFM">DRFM — Ghost track injection</option>
+                </select>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="applyEcm()" style="font-size:11px;">Apply</button>
+                    <span id="ecm-active" class="ecm-badge ecm-NONE">NONE</span>
+                </div>
+            </div>
+
+            <!-- Defended Asset -->
+            <div class="panel">
+                <h6>Defended Asset</h6>
+                <div id="asset-pos" style="font-size:13px; color:#f9e2af;">★ &nbsp; x: 5.00 &nbsp; y: 5.00</div>
+                <div style="font-size:10px; color:#585b70; margin-top:4px;">Select "Place Asset" tool then click canvas</div>
+            </div>
+
+            <!-- IFF Zones -->
+            <div class="panel">
+                <h6>IFF Zones <span id="zone-count" style="color:#6c7086; font-weight:normal;">(0)</span></h6>
+                <div id="zone-list">
+                    <div style="color:#585b70; font-size:11px;">No zones. Select "Add IFF Zone" and click canvas.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

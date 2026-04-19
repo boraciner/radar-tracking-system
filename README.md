@@ -2,18 +2,16 @@
 
 # 🎯 Radar Tracking System
 
-**Real-time multi-target tracking with Kalman filtering over a microservices pipeline**
+**Real-time multi-target tracking, threat assessment, ECM simulation and scenario editing over a microservices pipeline**
 
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.1-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
-[![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-2024.0.0-6DB33F?style=for-the-badge&logo=spring&logoColor=white)](https://spring.io/projects/spring-cloud)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.3-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-2025.0.0-6DB33F?style=for-the-badge&logo=spring&logoColor=white)](https://spring.io/projects/spring-cloud)
 [![Apache Kafka](https://img.shields.io/badge/Apache_Kafka-3.x-231F20?style=for-the-badge&logo=apache-kafka&logoColor=white)](https://kafka.apache.org/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/compose/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-boraciner-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/boraciner)
 
-<img src="sys.jpeg" alt="System Architecture" width="780" style="border-radius: 12px; margin: 24px 0;" />
-
-> Simulate radar sensors → stream plots through Kafka → filter with a Kalman tracker → watch everything live on a canvas radar scope.
+> Simulate radar sensors → stream plots through Kafka → filter with a Kalman tracker → assess threats → visualise everything live on a canvas radar scope.
 
 </div>
 
@@ -21,7 +19,7 @@
 
 ## ✨ What It Does
 
-Three synthetic radar targets move across the screen simultaneously. Each target generates noisy position measurements every second. A Kalman filter tracker picks up those measurements, associates them to the right targets, and produces clean smoothed tracks. A WebSocket-powered canvas UI lets you toggle between the raw plots, the ground truth, and the filtered tracks — all in real time.
+Three synthetic radar targets move across the screen simultaneously. Each target generates noisy position measurements every second. A Kalman filter tracker associates measurements to targets and produces clean smoothed tracks. A threat assessment engine scores each track for proximity and closing speed against a defended asset, classifies it (FRIENDLY → HOSTILE), and colours the radar scope accordingly. An IFF zone system lets you designate friendly, restricted and hostile airspace. A scenario editor UI lets you reposition the asset, paint IFF zones and inject ECM jamming modes — all without restarting anything.
 
 ---
 
@@ -32,18 +30,23 @@ flowchart LR
     RS([🛰️ radar-service\n:8000])
     PL([📡 plot-listener-service\n:8100])
     KF([🧮 tracker-service\n:8200])
+    TA([⚠️ threat-assessment-service\n:8300])
     MV([🖥️ map-viewer-service\n:8080])
+    SE([🗺️ scenario-editor-service\n:8400])
     EU([🔍 naming-service\nEureka :8761])
     K[(Apache Kafka)]
-    BR([🌐 Browser\nCanvas UI])
+    BR([🌐 Browser])
 
     RS -- "POST /plots" --> PL
     PL -- "PlotTopic" --> K
     K -- "PlotTopic" --> KF
     KF -- "TrackTopic" --> K
-    K -- "PlotTopic\nTrackTopic" --> MV
+    K -- "TrackTopic" --> TA
+    TA -- "ThreatTopic" --> K
+    K -- "PlotTopic\nTrackTopic\nThreatTopic" --> MV
     MV -- "WebSocket /user" --> BR
-    EU -. "Service Discovery" .- RS & PL & KF & MV
+    SE -- "REST :8300\nREST :8000" --> TA & RS
+    EU -. "Service Discovery" .- RS & PL & KF & TA & MV & SE
 ```
 
 ---
@@ -52,11 +55,13 @@ flowchart LR
 
 | Service | Port | Description |
 |:--------|:----:|:------------|
-| `naming-service` | **8761** | Eureka service registry — all services register here |
-| `radar-service` | **8000** | Generates 3 independent targets every second with Gaussian noise (σ = 0.15) |
-| `plot-listener-service` | **8100** | Receives plots via REST, publishes to Kafka `PlotTopic` |
-| `tracker-service` | **8200** | Runs the Kalman filter, publishes confirmed tracks to `TrackTopic` |
-| `map-viewer-service` | **8080** | Kafka consumer + WebSocket server + canvas radar scope |
+| `naming-service` | **8761** | Eureka service registry |
+| `radar-service` | **8000** | Target simulator with ECM injection (NONE / BARRAGE / SPOT / DRFM) |
+| `plot-listener-service` | **8100** | REST → Kafka bridge, publishes to `PlotTopic` |
+| `tracker-service` | **8200** | Kalman filter + track lifecycle, publishes to `TrackTopic` |
+| `threat-assessment-service` | **8300** | Threat scoring engine, IFF zone registry, asset position, publishes to `ThreatTopic` |
+| `map-viewer-service` | **8080** | Kafka consumer + WebSocket server + live canvas radar scope |
+| `scenario-editor-service` | **8400** | Canvas UI to place asset, paint IFF zones, switch ECM mode |
 
 ---
 
@@ -90,6 +95,61 @@ New plot  ──►  TENTATIVE  ──( 3 hits )──►  CONFIRMED  ──( 5 
 
 ---
 
+## ⚠️ Threat Assessment Engine
+
+Each confirmed track is scored against the **defended asset** (default position 5, 5) on two components:
+
+| Component | Weight (approaching) | Formula |
+|:----------|:-----:|:--------|
+| Distance | 40 % | `1 − dist / MAX_RANGE` |
+| Closing speed | 60 % | `clamp(closing / 3.0, 0, 1)` |
+
+Tracks moving away use distance-only scoring (weight 30 %).
+
+**Threat levels:**
+
+| Score | Level | Colour |
+|:-----:|:------|:-------|
+| < 0.20 | NEUTRAL | Grey |
+| < 0.40 | UNKNOWN | Yellow |
+| < 0.65 | SUSPECT | Orange |
+| ≥ 0.65 | HOSTILE | Red |
+
+IFF zone membership overrides the score: a track inside a **FRIENDLY** zone → `FRIENDLY`; inside a **RESTRICTED** zone → `SUSPECT`; inside a **HOSTILE** zone → `HOSTILE`.
+
+---
+
+## 🛡️ IFF Zones
+
+Zones are managed via REST (`threat-assessment-service :8300`):
+
+| Method | Path | Description |
+|:-------|:-----|:------------|
+| `GET` | `/iff-zones` | List all zones |
+| `POST` | `/iff-zones` | Create a zone (name, centerX/Y, radius, type) |
+| `DELETE` | `/iff-zones/{id}` | Remove a zone |
+| `GET` | `/asset` | Get defended asset position |
+| `POST` | `/asset` | Move defended asset |
+
+Zone types: **FRIENDLY** (green), **RESTRICTED** (yellow), **HOSTILE** (red).
+
+---
+
+## 📡 ECM Simulation
+
+ECM mode is set via `radar-service :8000`:
+
+| Mode | Effect |
+|:-----|:-------|
+| `NONE` | Normal σ = 0.15 |
+| `BARRAGE` | σ = 0.75 + 0–2 random false alarms per cycle |
+| `SPOT` | Drops all plots with `trueX < 4.0` (blind sector) |
+| `DRFM` | Injects 1–2 ghost copies per plot at ±0.6 random offset |
+
+Switch mode via the Scenario Editor or `POST /ecm {"mode": "BARRAGE"}`.
+
+---
+
 ## 📡 Simulated Targets
 
 | Target | Trajectory | Starting X |
@@ -106,32 +166,35 @@ Each target sweeps `x = 0 → 10` (step 0.2/s), then wraps back to 0 for continu
 
 Open **`http://localhost:8080`** after starting all services.
 
-<table>
-<tr>
-<td width="50%">
+| Layer | Symbol | Description |
+|:------|:------:|:------------|
+| Raw Plots | `×` | Noisy measurements, coloured per target |
+| Ground Truth | `▲` | True positions, same target colour |
+| Kalman Tracks | `○` | Filtered tracks, coloured by threat level |
+| IFF Zones | `⬤` | Coloured circles (FRIENDLY/RESTRICTED/HOSTILE) |
+| Defended Asset | `★` | Pulsing star at asset position |
 
-**Three toggleable layers:**
+Side panel shows:
+- Active track count and total plot count
+- Threat summary (counts per level)
+- Per-track list with threat level and distance-to-asset
+- IFF zone list
+- ECM mode badge
 
-| Symbol | Layer | Colour |
-|:------:|:------|:-------|
-| `×` | Raw plots (noisy) | Yellow / Cyan / Green per target |
-| `▲` | Ground truth | Same target colour |
-| `○` | Kalman tracks | Blue palette per track ID |
+WebSocket auto-reconnects. ECM / zone / asset state auto-refreshes every 5 s.
 
-</td>
-<td width="50%">
+---
 
-**Side panel shows:**
-- Active track count
-- Live `x / y / vx / vy` per track
-- Target colour legend
-- Connection status badge
+## 🗺️ Scenario Editor
 
-</td>
-</tr>
-</table>
+Open **`http://localhost:8400`** to edit the live scenario.
 
-All layers render fading history trails. The canvas redraws at 60 fps via `requestAnimationFrame`. WebSocket auto-reconnects on drop.
+- **Place Asset** — click anywhere on the canvas to move the defended asset
+- **Add IFF Zone** — click to place a named zone (set name, radius and type in the form)
+- **Delete Zone** — click the × button in the zone list
+- **ECM Mode** — select NONE / BARRAGE / SPOT / DRFM and click Apply
+
+Changes take effect immediately — the radar scope and threat assessor pick them up within seconds.
 
 ---
 
@@ -140,13 +203,14 @@ All layers render fading history trails. The canvas redraws at 60 fps via `reque
 | Topic | Producer | Consumers |
 |:------|:---------|:----------|
 | `PlotTopic` | `plot-listener-service` | `tracker-service`, `map-viewer-service` |
-| `TrackTopic` | `tracker-service` | `map-viewer-service` |
+| `TrackTopic` | `tracker-service` | `threat-assessment-service`, `map-viewer-service` |
+| `ThreatTopic` | `threat-assessment-service` | `map-viewer-service` |
 
 ---
 
 ## 🚀 Quick Start
 
-**Prerequisites:** Java 21, Maven, Docker
+**Prerequisites:** Java 21, Docker
 
 ### 1 — Start Kafka
 
@@ -161,26 +225,24 @@ docker-compose up -d
 start-all.bat
 ```
 
-Or manually, **in this order**:
+Or manually with Gradle, **in this order**:
 
 ```bash
-# Eureka first
-cd naming-service        && mvn spring-boot:run
-
-# Then these three (order doesn't matter much)
-cd plot-listener-service && mvn spring-boot:run
-cd tracker-service       && mvn spring-boot:run
-cd map-viewer-service    && mvn spring-boot:run
-
-# Radar last — pipeline must be ready to receive plots
-cd radar-service         && mvn spring-boot:run
+./gradlew :naming-service:bootRun            # Eureka first
+./gradlew :plot-listener-service:bootRun
+./gradlew :tracker-service:bootRun
+./gradlew :threat-assessment-service:bootRun
+./gradlew :map-viewer-service:bootRun
+./gradlew :scenario-editor-service:bootRun
+./gradlew :radar-service:bootRun             # Radar last
 ```
 
-### 3 — Open the UI
+### 3 — Open the UIs
 
 | URL | Page |
 |:----|:-----|
 | `http://localhost:8080` | 🎯 Live radar scope |
+| `http://localhost:8400` | 🗺️ Scenario editor |
 | `http://localhost:8761` | 🔍 Eureka dashboard |
 
 ---
@@ -189,19 +251,37 @@ cd radar-service         && mvn spring-boot:run
 
 ```
 radar-tracking-system/
-├── naming-service/          # Eureka server
-├── radar-service/           # Target simulator
-├── plot-listener-service/   # REST → Kafka bridge
+├── naming-service/
+├── radar-service/              # ECM: EcmMode, EcmState, EcmController
+├── plot-listener-service/
 ├── tracker-service/
-│   ├── KalmanFilter.java    # Filter math (commons-math3)
-│   ├── TrackedObject.java   # Per-track state machine
-│   └── TrackManager.java    # Association + lifecycle
+│   ├── KalmanFilter.java
+│   ├── TrackedObject.java
+│   └── TrackManager.java
+├── threat-assessment-service/  # NEW
+│   ├── model/                  # ThreatLevel, IffZone, ThreatAssessment, AssetPosition
+│   ├── service/                # ThreatAssessor, IffZoneRegistry
+│   ├── kafka/                  # TrackConsumer, ThreatProducerService
+│   └── controller/             # IffZoneController, AssetController
 ├── map-viewer-service/
-│   ├── kafka/               # Kafka consumers + WebSocket broadcast
-│   ├── static/index.html    # Canvas UI layout
-│   └── static/app.js        # Rendering engine + WS client
-├── docker-compose.yml       # Kafka + Zookeeper
-└── start-all.bat            # One-click launcher
+│   ├── kafka/                  # Plot, Track, ThreatAssessment consumers → WebSocket
+│   ├── static/index.html       # Canvas UI with threat/zone/ECM panels
+│   └── static/app.js           # Rendering engine + WS client
+├── scenario-editor-service/    # NEW
+│   └── static/                 # index.html + app.js (canvas editor)
+├── gradle/libs.versions.toml   # Shared version catalog
+├── docker-compose.yml
+└── start-all.bat               # One-click launcher (7 services)
+```
+
+---
+
+## 🛠️ Useful Gradle Tasks
+
+```bash
+./gradlew build                    # compile + test all 7 services
+./gradlew checkVersions            # check for dependency updates
+./gradlew :service-name:bootRun    # start a single service
 ```
 
 ---
